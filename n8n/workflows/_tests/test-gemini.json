@@ -1,0 +1,114 @@
+{
+  "name": "Test Gemini",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kit-test-gemini",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "kit-test-gemini"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Reply with exactly: OK"
+      },
+      "id": "a2b3c4d5-e6f7-8901-bcde-f12345678901",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "modelName": "__GEMINI_MODEL__",
+        "options": {}
+      },
+      "id": "b3c4d5e6-f7a8-9012-cdef-123456789012",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [470, 520],
+      "credentials": {
+        "googlePalmApi": {
+          "name": "SC - Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c4d5e6f7-a8b9-0123-def0-234567890123",
+              "name": "success",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "d5e6f7a8-b9c0-1234-ef01-345678901234",
+              "name": "provider",
+              "value": "gemini",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6f7a8b9-c0d1-2345-f012-456789012345",
+      "name": "Set Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [690, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Set Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": []
+}

@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f8f6;
+  --surface: #ffffff;
+  --foreground: #111827;
+  --accent: #0e7c5c;
+  --accent-dark: #0b6b4f;
+  --accent-light: #e4f3ec;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 20px rgba(0, 0, 0, 0.06);
+  --radius-card: 20px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-light: var(--accent-light);
+  --font-sans: var(--font-jakarta);
+  --font-mono: var(--font-jetbrains);
+  --radius-card: var(--radius-card);
+  --shadow-card: var(--shadow-card);
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.app-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.app-scroll::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 9999px;
+}
+
+.app-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+.rounded-card {
+  border-radius: var(--radius-card);
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, #6ea8fe 0%, #3b82f6 100%);
+}
+.gradient-teal {
+  background: linear-gradient(135deg, #5eead4 0%, #14b8a6 100%);
+}
+.gradient-orange {
+  background: linear-gradient(135deg, #fdba74 0%, #f97316 100%);
+}
+.gradient-purple {
+  background: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 100%);
+}
+.gradient-pink {
+  background: linear-gradient(135deg, #f9a8d4 0%, #ec4899 100%);
+}
