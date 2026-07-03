@@ -1,0 +1,321 @@
+{
+  "name": "Main Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kit-run-main",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "m1000016-0016-4016-8016-000000000016",
+      "name": "Run Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 100],
+      "webhookId": "kit-run-main"
+    },
+    {
+      "parameters": {},
+      "id": "m1000001-0001-4001-8001-000000000001",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 280]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "__MAIN_SCHEDULE_CRON__"
+            }
+          ]
+        }
+      },
+      "id": "m1000011-0011-4011-8011-000000000011",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 460]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "__TEST_GOOGLE_SHEET_ID__"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "__TEST_GOOGLE_SHEET_NAME__"
+        },
+        "options": {}
+      },
+      "id": "m1000002-0002-4002-8002-000000000002",
+      "name": "Read Sheet Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [440, 360],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "SC - Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const rows = $input.all().map((item) => item.json);\nreturn [{ json: { rows } }];"
+      },
+      "id": "m1000017-0017-4017-8017-000000000017",
+      "name": "Combine Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [550, 360]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional project assistant. From the spreadsheet rows below, produce a concise executive standup for leadership.\n\nFormat exactly (plain text, no markdown headers):\nProject: [what they're working on]\nAchieved: [what got done today]\nLeft: [what's still pending]\nIssues: [blockers or \"none\"]\n\nIf multiple projects exist, combine into one cohesive update. Keep tone professional. 4-8 sentences total.\n\nData:\n{{ JSON.stringify($json.rows) }}"
+      },
+      "id": "m1000003-0003-4003-8003-000000000003",
+      "name": "Gemini Summary",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [660, 360]
+    },
+    {
+      "parameters": {
+        "modelName": "__GEMINI_MODEL__",
+        "options": {}
+      },
+      "id": "m1000004-0004-4004-8004-000000000004",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [660, 560],
+      "credentials": {
+        "googlePalmApi": {
+          "name": "SC - Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "__TEST_SLACK_CHANNEL__"
+        },
+        "text": "=:clipboard: *Daily Standup - {{ $now.format('MMM d, yyyy') }}*\n\n{{ $json.text }}",
+        "otherOptions": {}
+      },
+      "id": "m1000005-0005-4005-8005-000000000005",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [880, 360],
+      "credentials": {
+        "slackOAuth2Api": {
+          "name": "SC - Slack"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "__MAIN_GMAIL_TO__",
+        "subject": "=Daily Standup - {{ $now.format('MMM d, yyyy') }}",
+        "emailType": "html",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:600px\"><div style=\"background:#18181b;color:#fff;padding:16px\"><h2 style=\"margin:0\">Daily Standup Summary</h2></div><div style=\"padding:16px\"><pre style=\"white-space:pre-wrap;font-family:Arial\">{{ $('Gemini Summary').first().json.text }}</pre></div></div>",
+        "options": {}
+      },
+      "id": "m1000006-0006-4006-8006-000000000006",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1100, 360],
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "SC - Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m1000007-0007-4007-8007-000000000007",
+              "name": "success",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "m1000008-0008-4008-8008-000000000008",
+              "name": "summary",
+              "value": "={{ $('Gemini Summary').first().json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "m1000009-0009-4009-8009-000000000009",
+              "name": "providers",
+              "value": "gemini,gmail,google-sheets,slack",
+              "type": "string"
+            },
+            {
+              "id": "m1000012-0012-4012-8012-000000000012",
+              "name": "finishedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "m1000013-0013-4013-8013-000000000013",
+              "name": "workflowName",
+              "value": "Main Automation",
+              "type": "string"
+            },
+            {
+              "id": "m1000014-0014-4014-8014-000000000014",
+              "name": "slackChannel",
+              "value": "__TEST_SLACK_CHANNEL__",
+              "type": "string"
+            },
+            {
+              "id": "m1000015-0015-4015-8015-000000000015",
+              "name": "gmailTo",
+              "value": "__MAIN_GMAIL_TO__",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "m1000010-0010-4010-8010-000000000010",
+      "name": "Set Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1320, 360]
+    }
+  ],
+  "connections": {
+    "Run Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read Sheet Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Sheet Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Sheet Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sheet Data": {
+      "main": [
+        [
+          {
+            "node": "Combine Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Rows": {
+      "main": [
+        [
+          {
+            "node": "Gemini Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Summary": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Slack": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail": {
+      "main": [
+        [
+          {
+            "node": "Set Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Gemini Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": []
+}
