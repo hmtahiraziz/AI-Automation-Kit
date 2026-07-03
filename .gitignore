@@ -1,0 +1,39 @@
+# Secrets & local env (never commit)
+.env.*.local
+!.env.example
+
+# Dashboard server env (API key)
+dashboard/.env.local
+
+# n8n instance-specific credential IDs (regenerate via seed-credentials.ps1)
+n8n/credentials/manifest.json
+
+# Dependencies
+node_modules/
+dashboard/node_modules/
+
+# Next.js build output
+.next/
+dashboard/.next/
+dashboard/out/
+
+# Docker local data (if bind-mounted)
+postgres_data/
+n8n_data/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.cursor/
+.vscode/
+
+# TypeScript / tooling
+*.tsbuildinfo
+config.bat
